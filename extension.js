@@ -137,6 +137,20 @@ async function activate(context) {
 		}
 	});
 	context.subscriptions.push(disposable);
+	disposable = vscode.commands.registerCommand('virustotal.import_database', async function (file_name) {
+		let database_content = JSON.parse(fs.readFileSync(file_name.fsPath,{encoding: "utf-8"}))
+
+		try{
+			VT_CACHE.import_database(database_content)
+			vscode.window.showInformationMessage(`Database suscesfully imported`);
+		}catch(e){
+			vscode.window.showErrorMessage(`Error importing database ${file_name.fsPath}`);
+		}
+		
+		
+	});
+	context.subscriptions.push(disposable);
+	
 }
 
 // this method is called when your extension is deactivated

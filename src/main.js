@@ -132,6 +132,12 @@ class VirusTotalQueue {
         return !!this.local_cache.findOne({ "id": data })
     }
 
+    /**
+     * 
+     * @param {string} data 
+     * @param {Function} fn 
+     * @returns 
+     */
     analyze_data(data, fn) {
         let cached_element = this.local_cache.findOne({ "ioc": data })
         let now = Date.now();
@@ -143,6 +149,16 @@ class VirusTotalQueue {
             return cached_element
         }
         if (net.isIP(data) != 0) {
+            if(data.startsWith("10.") || data.startsWith("192.168.") ){
+                return null
+            }
+            if(data.startsWith("172.")){
+                let n_2 = data.split(".")[1]
+                if(n_2 >= 16 && n_2 <= 31){
+                    return null
+                }
+            }
+
             this.queue.insertOne({ "type": "ip", "ioc": data })
             this.queue_data.push({ "type": "ip", "ioc": data })
         } else if ([32, 40, 64].includes(data.length) && !NOT_HASH.test(data)) {
@@ -163,6 +179,27 @@ class VirusTotalQueue {
         this.queue_files.push(file_path)
         if (fn) {
             this.subscribe(data, fn)
+        }
+    }
+    import_munin_database(database){
+        for(let element of database) {
+            try {
+                element["ioc"] = element["id"]
+                this.local_cache.insertOne(element)
+            }catch(e){}
+        }
+    }
+    import_database(database){
+        let data_collection = database._collections.find(vl => vl.name == "data")
+        for(let element of data_collection._data) {
+            if (this.remove_engine_info) {
+                if (element.data && element.data.attributes && element.data.attributes.last_analysis_results) {
+                    delete element.data.attributes.last_analysis_results
+                }
+            }
+            try {
+                this.local_cache.insertOne(element)
+            }catch(e){}
         }
     }
 }

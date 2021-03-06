@@ -2,7 +2,7 @@
 	"name": "virustotal",
 	"displayName": "VirusTotal",
 	"description": "VirusTotal checker in VSCode",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -39,6 +39,10 @@
 			{
 				"command": "virustotal.analyze_text",
 				"title": "VirusTotal: Analyze IOC in text"
+			},
+			{
+				"command": "virustotal.import_database",
+				"title": "VirusTotal: Import IOC database"
 			}
 		],
 		"menus": {
@@ -56,6 +60,11 @@
 				{
 					"when": "resourceExtname == .ioc || resourceExtname == .txt || resourceExtname == .json || resourceExtname == .csv",
 					"command": "virustotal.analyze_iocs",
+					"group": "VirusTotal"
+				},
+				{
+					"when": "resourceExtname == .db",
+					"command": "virustotal.import_database",
 					"group": "VirusTotal"
 				}
 			],
