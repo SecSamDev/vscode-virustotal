@@ -4,7 +4,10 @@
 	"description": "VirusTotal checker in VSCode",
 	"version": "0.0.1",
 	"engines": {
-		"vscode": "^1.53.0"
+		"vscode": "^1.54.0"
+	},
+	"repository": {
+		"url": "https://github.com/SecSamDev/vscode-virustotal"
 	},
 	"categories": [
 		"Other"
@@ -119,5 +122,11 @@
 		"@lokidb/full-text-search": "^2.1.0",
 		"@lokidb/loki": "^2.1.0",
 		"form-data": "^4.0.0"
+	},
+	"publisher": "secsamdev",
+	"author": {
+		"email": "samuel.garces@protonmail.com",
+		"name": "Samuel Garcés",
+		"url": "https://github.com/SecSamDev"
 	}
 }
