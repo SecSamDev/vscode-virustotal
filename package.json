@@ -17,7 +17,7 @@
 		"onCommand:virustotal.analyze_data",
 		"onCommand:virustotal.analyze_iocs"
 	],
-	"icon": "./doc/VT.png",
+	"icon": "doc/VT.png",
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
