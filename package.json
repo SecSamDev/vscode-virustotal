@@ -1,0 +1,123 @@
+{
+	"name": "virustotal",
+	"displayName": "VirusTotal",
+	"description": "VirusTotal checker in VSCode",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.53.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"*",
+		"onCommand:virustotal.analyze_data",
+		"onCommand:virustotal.analyze_iocs"
+	],
+	"main": "./extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "virustotal.analyze_data",
+				"title": "VirusTotal: Analyze IP/Hash/Domain"
+			},
+			{
+				"command": "virustotal.analyze_iocs",
+				"title": "VirusTotal: Analyze IOC list file"
+			},
+			{
+				"command": "virustotal.analyze_file",
+				"title": "VirusTotal: Analyze file"
+			},
+			{
+				"command": "virustotal.submit_file",
+				"title": "VirusTotal: Submit file to VirusTotal"
+			},
+			{
+				"command": "virustotal.analyze_text",
+				"title": "VirusTotal: Analyze IOC in text"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"when": "resourceExtname != .ioc && resourceExtname != .txt && resourceExtname != .json && resourceExtname != .csv",
+					"command": "virustotal.analyze_file",
+					"group": "VirusTotal"
+				},
+				{
+					"when": "resourceExtname != .ioc && resourceExtname != .txt && resourceExtname != .json && resourceExtname != .csv",
+					"command": "virustotal.submit_file",
+					"group": "VirusTotal"
+				},
+				{
+					"when": "resourceExtname == .ioc || resourceExtname == .txt || resourceExtname == .json || resourceExtname == .csv",
+					"command": "virustotal.analyze_iocs",
+					"group": "VirusTotal"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "virustotal.analyze_text",
+					"group": "VirusTotal"
+				}
+			]
+		},
+		"configuration": {
+			"title": "VirusTotal",
+			"properties": {
+				"virustotal.api_key": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "VirusTotal API_KEY to analyze IPs, domains or Hashes"
+				},
+				"virustotal.database_path": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "Location where to save the cache database"
+				},
+				"virustotal.shared_folder": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "Allow the extension to work in conjuntion with other host to process files and share a common database"
+				},
+				"virustotal.remove_engine_info": {
+					"type": "boolean",
+					"default": false,
+					"description": "Removes the engine results information from the VT Result to reduce Database size"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"test": "node ./test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.54.0",
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.0.4",
+		"@types/node": "^12.11.7",
+		"eslint": "^7.19.0",
+		"glob": "^7.1.6",
+		"mocha": "^8.2.1",
+		"typescript": "^4.1.3",
+		"vscode-test": "^1.5.0"
+	},
+	"dependencies": {
+		"@lokidb/fs-storage": "^2.1.0",
+		"@lokidb/full-text-search": "^2.1.0",
+		"@lokidb/loki": "^2.1.0",
+		"form-data": "^4.0.0"
+	}
+}
