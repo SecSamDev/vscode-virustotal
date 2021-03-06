@@ -2,7 +2,7 @@
 	"name": "virustotal",
 	"displayName": "VirusTotal",
 	"description": "VirusTotal checker in VSCode",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -17,6 +17,7 @@
 		"onCommand:virustotal.analyze_data",
 		"onCommand:virustotal.analyze_iocs"
 	],
+	"icon": "./doc/VT.png",
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
