@@ -3,8 +3,8 @@ const net = require('net')
 const vscode = require('vscode')
 const { Loki } = require("@lokidb/loki")
 
-const NOT_DOMAIN = new RegExp("[^a-z0-9-\\.]", "i");
-const NOT_HASH = new RegExp("[^a-f0-9]", "i");
+const IS_DOMAIN = new RegExp("(\\w+\\.)+\\w+", "i");
+const IS_HASH = new RegExp("[a-f0-9]+", "i");
 
 class VirusTotalQueue {
     /**
@@ -63,9 +63,9 @@ class VirusTotalQueue {
                 }
             } else {
                 let obj = that.queue_data.shift();
-                obj.ioc = obj.ioc.trim()
                 if (!!obj) {
                     try {
+                        obj.ioc = obj.ioc.trim()
                         let resp = null
                         if (obj.type == "ip") {
                             resp = await vt.analyze_ip(that.api_key, obj.ioc)
@@ -163,10 +163,10 @@ class VirusTotalQueue {
 
             this.queue.insertOne({ "type": "ip", "ioc": data })
             this.queue_data.push({ "type": "ip", "ioc": data })
-        } else if ([32, 40, 64].includes(data.length) && !NOT_HASH.test(data)) {
+        } else if ([32, 40, 64].includes(data.length) && IS_HASH.test(data)) {
             this.queue.insertOne({ "type": "hash", "ioc": data })
             this.queue_data.push({ "type": "hash", "ioc": data })
-        } else if (NOT_DOMAIN.test(data)) {
+        } else if (IS_DOMAIN.test(data)) {
             this.queue.insertOne({ "type": "domain", "ioc": data })
             this.queue_data.push({ "type": "domain", "ioc": data })
         } else {

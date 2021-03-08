@@ -82,7 +82,7 @@ async function activate(context) {
 	disposable = vscode.commands.registerCommand('virustotal.analyze_iocs', async function (file_name) {
 		let content = fs.readFileSync(file_name.fsPath,"utf-8")
 		let lines = content.split("\n")
-		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\n"
+		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\tCountry\tISP\n"
 		for(let ln of lines){
 			let res = null
 			try{
@@ -92,7 +92,7 @@ async function activate(context) {
 			if(res && res.data && res.data.attributes && res.data.attributes.last_analysis_stats) {
 				let malicious = ""
 				try {
-					malicious = res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected
+					malicious = res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t" + res.data.attributes.country + "\t" + res.data.attributes.as_owner
 				}catch(e){}
 				toReturn += ln + "\t" + malicious + "\n"
 			}else{
