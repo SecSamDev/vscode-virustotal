@@ -63,6 +63,7 @@ class VirusTotalQueue {
                 }
             } else {
                 let obj = that.queue_data.shift();
+                obj.ioc = obj.ioc.trim()
                 if (!!obj) {
                     try {
                         let resp = null
@@ -139,6 +140,7 @@ class VirusTotalQueue {
      * @returns 
      */
     analyze_data(data, fn) {
+        data = data.trim()
         let cached_element = this.local_cache.findOne({ "ioc": data })
         let now = Date.now();
 
