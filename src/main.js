@@ -67,6 +67,7 @@ class VirusTotalQueue {
                     try {
                         obj.ioc = obj.ioc.trim()
                         let resp = null
+                        that.last_check = nw;
                         if (obj.type == "ip") {
                             resp = await vt.analyze_ip(that.api_key, obj.ioc)
                         } else if (obj.type == "domain") {
@@ -101,7 +102,12 @@ class VirusTotalQueue {
                                     }
 
                                 })
-                            } catch (e) { }
+                            } catch (e) {}
+                            try{
+                                that.queue.findAndRemove({ "ioc": obj.ioc })
+                            }catch(e){
+                                console.log(e)
+                            }
                         } else {
                             that.queue_data.push(obj)
                         }
@@ -110,15 +116,16 @@ class VirusTotalQueue {
 
                 }
             }
-            let update = that.stats.findOne({ "day": currentDay() })
+            
             that.stats.findAndUpdate({ "day": currentDay() }, (obj) => {
                 obj.inserts += 1
                 return obj
             })
+            let update = that.stats.findOne({ "day": currentDay() })
             try {
                 await that.database.saveDatabase()
             } catch (e) { }
-            that.updates_today += 1
+            that.updates_today = update.inserts
             that.last_check = nw;
         }, 1000)
     }
@@ -202,6 +209,20 @@ class VirusTotalQueue {
             try {
                 this.local_cache.insertOne(element)
             }catch(e){}
+        }
+    }
+    show_queue_iocs(){
+        try{
+            return this.queue.find().map(val => val.ioc)
+        }catch(e){
+            return []
+        }
+    }
+    show_last_inserted_items(){
+        try{
+            return this.local_cache.find().map(val => val.ioc)
+        }catch(e){
+            return []
         }
     }
 }

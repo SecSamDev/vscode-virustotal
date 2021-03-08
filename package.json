@@ -2,7 +2,7 @@
 	"name": "virustotal",
 	"displayName": "VirusTotal",
 	"description": "VirusTotal checker in VSCode",
-	"version": "0.0.9",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -24,6 +24,14 @@
 			{
 				"command": "virustotal.analyze_data",
 				"title": "VirusTotal: Analyze IP/Hash/Domain"
+			},
+			{
+				"command": "virustotal.queue_list",
+				"title": "VirusTotal: Show IOCs to be processed"
+			},
+			{
+				"command": "virustotal.last_inserted",
+				"title": "VirusTotal: Show last IOCs in cache"
 			},
 			{
 				"command": "virustotal.analyze_iocs",

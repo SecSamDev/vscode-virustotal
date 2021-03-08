@@ -12,7 +12,7 @@ async function analyze_hash(api_key, hash) {
     return request_json_get(api_key, "/api/v3/files/" + hash)
 }
 async function analyze_domains(api_key, domain) {
-    return request_json_get(api_key, "/api/v3/files/" + domain)
+    return request_json_get(api_key, "/api/v3/domains/" + domain)
 }
 
 async function analyze_file(api_key, file_path) {

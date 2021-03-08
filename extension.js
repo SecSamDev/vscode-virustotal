@@ -78,11 +78,31 @@ async function activate(context) {
 
 	});
 	context.subscriptions.push(disposable);
+	disposable = vscode.commands.registerCommand('virustotal.queue_list', async function () {
+		
+		let doc = await vscode.workspace.openTextDocument({
+			language : "ioc",
+			content : VT_CACHE.show_queue_iocs().join("\n")
+		});
+		await vscode.window.showTextDocument(doc)
 
+	});
+	context.subscriptions.push(disposable);
+	disposable = vscode.commands.registerCommand('virustotal.last_inserted', async function () {
+		
+		let doc = await vscode.workspace.openTextDocument({
+			language : "ioc",
+			content : VT_CACHE.show_last_inserted_items().join("\n")
+		});
+		await vscode.window.showTextDocument(doc)
+
+	});
+	context.subscriptions.push(disposable);
+	
 	disposable = vscode.commands.registerCommand('virustotal.analyze_iocs', async function (file_name) {
 		let content = fs.readFileSync(file_name.fsPath,"utf-8")
 		let lines = content.split("\n")
-		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\tCountry\tISP\n"
+		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\tExtra\n"
 		for(let ln of lines){
 			let res = null
 			try{
@@ -92,8 +112,10 @@ async function activate(context) {
 			if(res && res.data && res.data.attributes && res.data.attributes.last_analysis_stats) {
 				let malicious = ""
 				try {
-					malicious = res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t" + res.data.attributes.country + "\t" + res.data.attributes.as_owner
-				}catch(e){}
+					malicious = mapText(res)
+				}catch(e){
+					malicious = ""
+				}
 				toReturn += ln + "\t" + malicious + "\n"
 			}else{
 				toReturn += ln + "\tN/A\n"
@@ -145,15 +167,16 @@ async function activate(context) {
 		if(!data || data.length == 0){
 			return;
 		}
-		let ioc = VT_CACHE.analyze_data(data, async (resp) => {
-			let doc = await vscode.workspace.openTextDocument({
-				language : "json",
-				content :JSON.stringify(resp["data"],null,"\t")
+		let splt = data.split("\n").map(val => val.trim())
+		vscode.window.showInformationMessage(`VirusTotal is analyzing ${data}`);
+		for(let elmnt of splt) {
+			VT_CACHE.analyze_data(elmnt, async (resp) => {
+				let doc = await vscode.workspace.openTextDocument({
+					language : "json",
+					content :JSON.stringify(resp["data"],null,"\t")
+				});
+				await vscode.window.showTextDocument(doc)
 			});
-			await vscode.window.showTextDocument(doc)
-		});
-		if(!ioc){
-			vscode.window.showInformationMessage(`VirusTotal is analyzing ${data}`);
 		}
 	});
 	context.subscriptions.push(disposable);
@@ -200,4 +223,34 @@ async function hash_sha1_file(file_path) {
 			reject(e)
 		})
 	})
+}
+
+function mapText(res) {
+	if(res.data.type == "ip_address"){
+		return mapIp(res)
+	}else if(res.data.type == "domain"){
+		return mapDomain(res)
+	}else if(res.data.type == "file"){
+		return mapHash(res)
+	}
+	res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t\"" + "\""
+}
+
+function mapHash(res){
+	let filename = res.data.attributes.names.length  > 0 ? res.data.attributes.names.slice(0,Math.min(5,res.data.attributes.names.length)).join("|") : ""
+	return res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t\"" + filename + "\""
+}
+function mapDomain(res){
+	let categories = "N/A"
+	if (res.data.attributes.categories) {
+		let cats = Object.keys(res.data.attributes.categories)
+		if(cats.length > 0){
+			category = res.data.attributes.categories[cats[0]]
+		}
+	}
+	
+	return res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t\"" + category + "\""
+}
+function mapIp(res){
+	return res.data.attributes.last_analysis_stats.harmless + "\t" + res.data.attributes.last_analysis_stats.malicious + "\t" + res.data.attributes.last_analysis_stats.suspicious + "\t" + res.data.attributes.last_analysis_stats.undetected + "\t\"" + (res.data.attributes.country || "N/A") + " " + (res.data.attributes.as_owner || "N/A") + "\""
 }
