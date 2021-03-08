@@ -82,9 +82,29 @@ async function activate(context) {
 	disposable = vscode.commands.registerCommand('virustotal.analyze_iocs', async function (file_name) {
 		let content = fs.readFileSync(file_name.fsPath,"utf-8")
 		let lines = content.split("\n")
+		let toReturn = ""
 		for(let ln of lines){
-			VT_CACHE.analyze_data(ln);
+			let res = null
+			try{
+				res = VT_CACHE.analyze_data(ln);
+			}catch(e){}
+
+			if(res && res.data && res.data.attributes) {
+				let malicious = ""
+				try {
+					malicious = res.data.attributes.harmless + " " + res.data.attributes.malicious + " " + res.data.attributes.suspicious + " " + res.data.attributes.undetected
+				}catch(e){}
+				toReturn += ln + "\t" + malicious + "\n"
+			}else{
+				toReturn += ln + "\tN/A\n"
+			}
 		}
+		let doc = await vscode.workspace.openTextDocument({
+			language : "json",
+			content : toReturn
+		});
+		await vscode.window.showTextDocument(doc)
+
 		vscode.window.showInformationMessage(`VirusTotal is analyzing IOCs in ${path.basename(file_name.fsPath)}`);
 
 	});
