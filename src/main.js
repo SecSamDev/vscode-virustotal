@@ -51,8 +51,10 @@ class VirusTotalQueue {
             }
 
             let file_to_analyze = that.queue_files.shift();
+            let request_done = false
             if (!!file_to_analyze) {
                 try {
+                    request_done = true
                     let resp = await vt.analyze_file(that.api_key, file_to_analyze)
 
                     if(resp.data && resp.data.type == "analysis"){
@@ -75,6 +77,7 @@ class VirusTotalQueue {
                         } else if (obj.type == "hash") {
                             resp = await vt.analyze_hash(that.api_key, obj.ioc)
                         }
+                        request_done = true
                         if (!resp) {
                             await vscode.window.showWarningMessage("Something went wrong with " + obj.ioc)
                         } else {
@@ -116,17 +119,20 @@ class VirusTotalQueue {
 
                 }
             }
-            
-            that.stats.findAndUpdate({ "day": currentDay() }, (obj) => {
-                obj.inserts += 1
-                return obj
-            })
-            let update = that.stats.findOne({ "day": currentDay() })
-            try {
-                await that.database.saveDatabase()
-            } catch (e) { }
-            that.updates_today = update.inserts
+            if(request_done){
+                that.stats.findAndUpdate({ "day": currentDay() }, (obj) => {
+                    obj.inserts += 1
+                    return obj
+                })
+                let update = that.stats.findOne({ "day": currentDay() })
+                try {
+                    await that.database.saveDatabase()
+                } catch (e) { }
+                that.updates_today = update.inserts
+                
+            }
             that.last_check = nw;
+            
         }, 1000)
     }
 
