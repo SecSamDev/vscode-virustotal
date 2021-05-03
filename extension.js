@@ -5,6 +5,12 @@ const crypto = require('crypto')
 
 const {VirusTotalQueue} = require('./src/main')
 const {openDatabase} = require('./src/cache')
+
+
+function endOfLine() {
+	return vscode.window.activeTextEditor.document.eol == 1 ? "\n" : "\r\n"
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
@@ -82,7 +88,7 @@ async function activate(context) {
 		
 		let doc = await vscode.workspace.openTextDocument({
 			language : "ioc",
-			content : VT_CACHE.show_queue_iocs().join("\n")
+			content : VT_CACHE.show_queue_iocs().join(endOfLine())
 		});
 		await vscode.window.showTextDocument(doc)
 
@@ -92,7 +98,7 @@ async function activate(context) {
 		
 		let doc = await vscode.workspace.openTextDocument({
 			language : "ioc",
-			content : VT_CACHE.show_last_inserted_items().join("\n")
+			content : VT_CACHE.show_last_inserted_items().join(endOfLine())
 		});
 		await vscode.window.showTextDocument(doc)
 
@@ -101,8 +107,9 @@ async function activate(context) {
 	
 	disposable = vscode.commands.registerCommand('virustotal.analyze_iocs', async function (file_name) {
 		let content = fs.readFileSync(file_name.fsPath,"utf-8")
-		let lines = content.split("\n")
-		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\tExtra\n"
+		let eol = endOfLine();
+		let toReturn = "IOC\tHarmless\tMalicious\tSuspicious\tUndetected\tExtra" + eol
+		let lines = content.split(eol)
 		for(let ln of lines){
 			let res = null
 			try{
@@ -116,9 +123,9 @@ async function activate(context) {
 				}catch(e){
 					malicious = ""
 				}
-				toReturn += ln + "\t" + malicious + "\n"
+				toReturn += ln + "\t" + malicious + eol
 			}else{
-				toReturn += ln + "\tN/A\n"
+				toReturn += ln + "\tN/A" + eol
 			}
 		}
 		let doc = await vscode.workspace.openTextDocument({
@@ -167,7 +174,7 @@ async function activate(context) {
 		if(!data || data.length == 0){
 			return;
 		}
-		let splt = data.split("\n").map(val => val.trim())
+		let splt = data.split(endOfLine()).map(val => val.trim())
 		vscode.window.showInformationMessage(`VirusTotal is analyzing ${data}`);
 		for(let elmnt of splt) {
 			VT_CACHE.analyze_data(elmnt, async (resp) => {
